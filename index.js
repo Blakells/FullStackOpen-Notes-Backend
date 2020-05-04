@@ -5,6 +5,7 @@ const app = express()
 // body parser for parsing the body when posting new notes to server
 app.use(express.json())
 app.use(cors())
+app.use(express.static('build'))
 
 let notes = [
   {
