@@ -29,7 +29,7 @@ let notes = [
 ]
 // landing page
 app.get('/', (req, res) => {
-  res.send('<h1>Hello world!</h1>')
+  res.send('<h1>Hello world!!</h1>')
 })
 
 // get all notes within the DB
