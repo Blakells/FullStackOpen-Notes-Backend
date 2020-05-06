@@ -9,19 +9,10 @@ app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
 
-const errorHandler = (err, req, res, next) => {
-  console.log(err.message)
-  if (err.name === 'CastError') {
-    return res.status(400).send({error: 'malformatted id'})
-  }
-  next(err)
-}
-app.use(errorHandler)
-
-const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: "unknown endpoint" });
-};
-app.use(unknownEndpoint)
+// const unknownEndpoint = (req, res) => {
+//   res.status(404).send({ error: "unknown endpoint" });
+// };
+// app.use(unknownEndpoint)
 /////////////////////////////////////////////////////////////////
 
 // landing page
@@ -76,7 +67,7 @@ app.put('/api/notes/:id', (req, res, next) => {
 })
 
 // add new notes to the server
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
   const body = req.body
 
   if (!body.content) {
@@ -89,11 +80,25 @@ app.post('/api/notes', (req, res) => {
     important: body.important || false,
     date: new Date(),
   })
-  note.save().then(savedNote => {
-    res.json(savedNote.toJSON())
-    console.log(savedNote.content)
+  note.save().then(savedNote =>savedNote.toJSON())
+  .then( savedAndFormattedNote => {
+    console.log(savedAndFormattedNote)
+    res.json(savedAndFormattedNote)
   })
+  .catch(err => next(err))
 })
+
+//error handler middleware
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError') {
+    return res.status(400).send({error: 'malformatted id'})
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({error: error.message})
+  }
+  next(error)
+}
+app.use(errorHandler)
 
 
 //PORT configuration
